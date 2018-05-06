@@ -64,4 +64,3 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
     to_return.push_back( tmp_line );
     return to_return;
 };
-
