@@ -1,0 +1,6 @@
+#Largo, Ancho
+500 700
+#Posicion X, Radop
+1 700
+2 400
+5 800
