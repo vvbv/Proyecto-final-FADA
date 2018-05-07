@@ -9,10 +9,8 @@ using namespace std;
 // Block of declarations
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
+vector < tuple < int, int > > solve_by_divide_and_conquer( tuple < vector < tuple < int, int > >, int, int > map_info );
 // End block of declarations
-
-// Block of global variables
-// End block of global variables
 
 int main( int argc, const char* argv[] ){
     tuple < vector < tuple < int, int > >, int, int > input = read_input( "input.txt" );
@@ -62,5 +60,11 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
         };
     };
     to_return.push_back( tmp_line );
+    return to_return;
+};
+
+vector < tuple < int, int > > solve_by_divide_and_conquer( tuple < vector < tuple < int, int > >, int, int > map_info ){
+    vector < tuple < int, int > > to_return;
+    
     return to_return;
 };
