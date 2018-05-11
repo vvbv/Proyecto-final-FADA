@@ -3,12 +3,15 @@
 #include <tuple>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
 // Block of declarations
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
+vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
+vector < int > sort_by_radius( vector < int > input, int p, int q  );
 // End block of declarations
 
 // Block of global variables
@@ -21,6 +24,7 @@ int main( int argc, const char* argv[] ){
         cout << "[x=" << get<0>( get<0>( input )[i] ) << ", r=" << get<1>( get<0>( input )[i] ) << "] ";
     };
     cout << endl;
+    voracious( input );
     return 0;
 };
 
@@ -62,6 +66,41 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
         };
     };
     to_return.push_back( tmp_line );
+    return to_return;
+};
+
+vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input ){
+    int width = get< 1 >( input );
+    int height = get< 2 >( input );
+    vector < tuple < int, int > > points =  get< 0 >( input );
+    vector < int > radius;
+    for( int i = 0; i < points.size(); i++ ){
+        radius.push_back( get< 1 >( points[i] ) );
+    };
+};
+
+vector < int > sort_by_radius( vector < int > input ){
+    /*int mid = floor( input.size() / 2 );
+    if( input.size() == 1 ){
+        return input;
+    }else if( input.size() == 2 ){
+        if( input[0] > input[1] ){
+            iter_swap( input[0], input[1] );
+        }else{
+            return input;
+        };
+    }else{
+    };*/
+    vector < int > to_return = input;
+    for( int i = 0; i < to_return.size(); i++ ){
+        for( int j = 0; j < input.size(); j++ ){
+            if( to_return[i] > input[j] ){
+                to_return[i] == input[j];
+                input.erase( input.begin() + j );
+            };
+        };
+        cout << to_return[i] << endl;
+    };
     return to_return;
 };
 
