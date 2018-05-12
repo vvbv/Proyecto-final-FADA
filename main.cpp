@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -11,7 +12,7 @@ using namespace std;
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
 vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
-vector < int > sort_by_radius( vector < int > input, int p, int q  );
+vector < int > sort_by_radius( vector < int > input );
 // End block of declarations
 
 // Block of global variables
@@ -24,7 +25,7 @@ int main( int argc, const char* argv[] ){
         cout << "[x=" << get<0>( get<0>( input )[i] ) << ", r=" << get<1>( get<0>( input )[i] ) << "] ";
     };
     cout << endl;
-    voracious( input );
+    vector < tuple < int, int > > voracios_solution = voracious( input );
     return 0;
 };
 
@@ -70,6 +71,7 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
 };
 
 vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input ){
+    vector < tuple < int, int > > to_return; 
     int width = get< 1 >( input );
     int height = get< 2 >( input );
     vector < tuple < int, int > > points =  get< 0 >( input );
@@ -77,6 +79,22 @@ vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, 
     for( int i = 0; i < points.size(); i++ ){
         radius.push_back( get< 1 >( points[i] ) );
     };
+    radius = sort_by_radius( radius );
+    vector < tuple < int, int > > sorted_points;
+    for( int i = 0; i < radius.size(); i++ ){
+        for( int j = 0; j < points.size(); j++ ){
+            if( radius[i] == get< 1 >( points[j] ) ){
+                sorted_points.push_back( points[j] );
+                points.erase( points.begin() + j );
+            };
+        };
+    };
+    for( int i = 0; i < sorted_points.size(); i++ ){
+        for( int j = 0; j < to_return.size(); j++ ){
+            
+        };
+    };
+    return to_return;
 };
 
 vector < int > sort_by_radius( vector < int > input ){
@@ -91,15 +109,19 @@ vector < int > sort_by_radius( vector < int > input ){
         };
     }else{
     };*/
-    vector < int > to_return = input;
-    for( int i = 0; i < to_return.size(); i++ ){
+    vector < int > to_return;
+    int input_size = input.size();
+    for( int i = 0; i < input_size; i++ ){
+        int index_minor = -1;
+        int value = std::numeric_limits<int>::max();;
         for( int j = 0; j < input.size(); j++ ){
-            if( to_return[i] > input[j] ){
-                to_return[i] == input[j];
-                input.erase( input.begin() + j );
+            if( value > input[j] ){
+                value = input[j];
+                index_minor = j;
             };
         };
-        cout << to_return[i] << endl;
+        to_return.push_back( input[index_minor] );
+        input.erase( input.begin() + index_minor );
     };
     return to_return;
 };
