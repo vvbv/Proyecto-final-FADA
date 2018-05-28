@@ -17,9 +17,6 @@ bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > 
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
 // End block of declarations
 
-// Block of global variables
-// End block of global variables
-
 int main( int argc, const char* argv[] ){
 
     tuple < vector < tuple < int, int > >, int, int > input = read_input( "input.txt" );
