@@ -1,6 +1,7 @@
-#Largo, Ancho
-500 700
-#Posicion X, Radop
-1 700
-2 400
-5 800
+#Ancho, Alto
+1000 500
+#Posicion X, Radio
+250 250
+750 250
+10 250
+100 250

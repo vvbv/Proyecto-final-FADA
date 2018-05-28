@@ -3,21 +3,35 @@
 #include <tuple>
 #include <vector>
 #include <fstream>
+#include <algorithm>
+#include <limits>
 
 using namespace std;
 
 // Block of declarations
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
-vector < tuple < int, int > > solve_by_divide_and_conquer( tuple < vector < tuple < int, int > >, int, int > map_info );
+vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
+vector < int > sort_by_radius( vector < int > input );
+bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
+string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
 // End block of declarations
 
 int main( int argc, const char* argv[] ){
+
     tuple < vector < tuple < int, int > >, int, int > input = read_input( "input.txt" );
-    cout << "Ancho: " << get<1>( input ) << ", Alto:" << get<2>( input ) << endl;
-    for( int i = 0; i < get<0>( input ).size(); i++ ){
-        cout << "[x=" << get<0>( get<0>( input )[i] ) << ", r=" << get<1>( get<0>( input )[i] ) << "] ";
-    };
+
+    int width = get< 1 >( input );
+    int height = get< 2 >( input );
+    vector < tuple < int, int > > points =  get< 0 >( input );
+
+    cout << endl << "Comandos para Geogebra [Entrada]: ";
+    cout << get_geogebra_plot_command( points, height, width ) << endl;
+
+    vector < tuple < int, int > > voracios_solution = voracious( input );
+    cout << endl << "Comandos para Geogebra [Salida: Voraz]: ";
+    cout << get_geogebra_plot_command( voracios_solution, height, width ) << endl;
+
     cout << endl;
     return 0;
 };
@@ -63,8 +77,126 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
     return to_return;
 };
 
-vector < tuple < int, int > > solve_by_divide_and_conquer( tuple < vector < tuple < int, int > >, int, int > map_info ){
-    vector < tuple < int, int > > to_return;
-    
+vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input ){
+    vector < tuple < int, int > > to_return; 
+    int width = get< 1 >( input );
+    int height = get< 2 >( input );
+    vector < tuple < int, int > > points =  get< 0 >( input );
+    vector < int > radius;
+    for( int i = 0; i < points.size(); i++ ){
+        radius.push_back( get< 1 >( points[i] ) );
+        
+    };
+    radius = sort_by_radius( radius );
+    vector < tuple < int, int > > sorted_points;
+    for( int i = 0; i < radius.size(); i++ ){
+        for( int j = 0; j < points.size(); j++ ){
+            if( radius[i] == get< 1 >( points[j] ) ){
+                sorted_points.push_back( points[j] );
+                points.erase( points.begin() + j );
+            };
+        };
+    };
+    reverse( sorted_points.begin(), sorted_points.end() );
+    for( int i = 0; i < sorted_points.size(); i++ ){
+        bool are_intersected_ = true;
+        are_intersected_ = are_intersected( sorted_points[i], to_return, height, width );
+        if( !are_intersected_ ){
+            to_return.push_back( sorted_points[i] );
+        };
+        //cout << "P: " << get<0>( sorted_points[i] ) << " - R:" << get<1>( sorted_points[i] ) << " - TR: " << are_intersected_ << endl;
+    };
     return to_return;
 };
+
+vector < int > sort_by_radius( vector < int > input ){
+    /*int mid = floor( input.size() / 2 );
+    if( input.size() == 1 ){
+        return input;
+    }else if( input.size() == 2 ){
+        if( input[0] > input[1] ){
+            iter_swap( input[0], input[1] );
+        }else{
+            return input;
+        };
+    }else{
+    };*/
+    vector < int > to_return;
+    int input_size = input.size();
+    for( int i = 0; i < input_size; i++ ){
+        int index_minor = -1;
+        int value = std::numeric_limits<int>::max();;
+        for( int j = 0; j < input.size(); j++ ){
+            if( value > input[j] ){
+                value = input[j];
+                index_minor = j;
+            };
+        };
+        to_return.push_back( input[index_minor] );
+        input.erase( input.begin() + index_minor );
+    };
+    return to_return;
+};
+
+bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width ){
+    if( fixed_points.size() == 0 ){
+        int point_x = get< 0 >( new_point );
+        int radius_ = get< 1 >( new_point );
+        double y_max = (double) radius_ + (double) ( (double) height / (double) 2 );
+        double y_min = (double) ( (double) height / (double) 2 ) - (double) radius_;
+        int x_max = point_x + radius_;
+        int x_min = point_x - radius_;
+        if( (y_min < 0)||(x_min < 0) ){
+            //cout << "C1: " << y_min << " " << x_min << " =>";
+            return true;
+        }else if( (y_max > height)||(x_max > width) ){
+            //cout << "C2" << endl;
+            return true;
+        }else{
+            //cout << "CT: " << y_min << " " << x_min << " =>";
+            return false;
+        };
+    }else{
+        for( int i = 0; i < fixed_points.size(); i++ ){
+            if( get< 0 >( fixed_points[i] ) ==  get< 0 >( new_point ) ){
+                return true;
+            }else{
+                int fixed_point_x_max = get< 0 >( fixed_points[i] ) + get< 1 >( fixed_points[i] );
+                int fixed_point_x_min = get< 0 >( fixed_points[i] ) - get< 1 >( fixed_points[i] ); 
+                int point_x = get< 0 >( new_point );
+                int radius_ = get< 1 >( new_point );
+                double y_max = (double) radius_ + (double) ( (double) height / (double) 2 );
+                double y_min =  (double) ( (double) height / (double) 2 ) - (double) radius_;
+                int x_max = point_x + radius_;
+                int x_min = point_x - radius_;
+                if( (y_min < 0)||(x_min < 0) ){
+                    return true;
+                }else if( (y_max > height)||(x_max > width) ){
+                    return true;
+                }else if( ( (x_max > fixed_point_x_min)&&(x_max < fixed_point_x_max) ) || ( (x_min < fixed_point_x_max)&&(x_min > fixed_point_x_min) )  ){
+                    //cout << "C3: " << x_max << " " << fixed_point_x_min << " - " << x_min << " " << fixed_point_x_max << " - " << " =>";
+                    return true;
+                };
+            };
+        };
+        return false;
+    };
+};
+
+string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width ){
+    string command = "";
+    command += "Execute[{\" x = " + to_string(0) + " \",";
+    command += " \" x = " + to_string((double) width) + " \",";
+    command += " \" y = " + to_string((double) height / (double) 2) + " \",";
+    command += " \" y = -" + to_string((double) height / (double) 2) + " \",";
+    for( int i = 0; i < points.size(); i++ ){
+        command += " \" Circle(( " +  to_string(get<0>( points[i] )) + " ,0), " +  to_string(get<1>( points[i] )) + ")\"";
+        if( i < ( points.size() - 1) ){
+            command += ",";
+        }else{
+            command += "}]";
+        };
+    };
+    return command;
+};
+
