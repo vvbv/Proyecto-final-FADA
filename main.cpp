@@ -184,7 +184,7 @@ vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vec
     }else{
         int s_p = input.size()/2;
         vector < vector < tuple < int, int > > > vector_splited = split_vector( input, s_p );
-        fixed_points = merge_vectors( max( dynamic_( vector_splited[0], fixed_points, width, height ), dynamic_( vector_splited[1], fixed_points, width, height ) ), fixed_points );
+        fixed_points = merge_vectors( max( max (dynamic_( vector_splited[0], fixed_points, width, height ), fixed_points), max( dynamic_( vector_splited[1], fixed_points, width, height ), fixed_points ) ), fixed_points );
         return fixed_points;
     };
 };
