@@ -5,6 +5,8 @@
 #include <fstream>
 #include <algorithm>
 #include <limits>
+#include <iterator>
+#include <armadillo>
 
 using namespace std;
 
@@ -12,9 +14,13 @@ using namespace std;
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
 vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
+vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
+vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < int > sort_by_radius( vector < int > input );
 bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
+vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int > > vector_, int split_point );
+vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
 // End block of declarations
 
 int main( int argc, const char* argv[] ){
@@ -31,6 +37,10 @@ int main( int argc, const char* argv[] ){
     vector < tuple < int, int > > voracios_solution = voracious( input );
     cout << endl << "Comandos para Geogebra [Salida: Voraz]: ";
     cout << get_geogebra_plot_command( voracios_solution, height, width ) << endl;
+
+    vector < tuple < int, int > > divide_n_conquer_solution = divide_n_conquer( input );
+    cout << endl << "Comandos para Geogebra [Salida: Divide y vencerás]: ";
+    cout << get_geogebra_plot_command( divide_n_conquer_solution, height, width ) << endl;
 
     cout << endl;
     return 0;
@@ -107,6 +117,36 @@ vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, 
         //cout << "P: " << get<0>( sorted_points[i] ) << " - R:" << get<1>( sorted_points[i] ) << " - TR: " << are_intersected_ << endl;
     };
     return to_return;
+};
+
+vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input ){
+    int width = get< 1 >( input );
+    int height = get< 2 >( input );
+    vector < tuple < int, int > > fixed_points;
+    return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
+};
+
+vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
+    cout << input.size() << " vs " << fixed_points.size() << endl;
+    if( input.size() == 0 ){
+        return fixed_points;
+    }else if( input.size() > 0 ){
+        int major_radius_index = 0;
+        for( int i = 0; i < input.size(); i++ ){
+            if( get<1>( input[i] ) >= get<1>( input[major_radius_index] ) ){
+                major_radius_index = i;
+            };
+        };
+        bool a_i = are_intersected( input[major_radius_index], fixed_points, height, width );
+        if( !a_i ){
+            fixed_points.push_back( input[major_radius_index] );
+            input.erase(input.begin() + major_radius_index);
+            return divide_n_conquer_( input, fixed_points, width, height );
+        }else{
+            input.erase(input.begin() + major_radius_index);
+            return divide_n_conquer_( input, fixed_points, width, height );
+        };
+    };
 };
 
 vector < int > sort_by_radius( vector < int > input ){
@@ -200,3 +240,33 @@ string get_geogebra_plot_command( vector < tuple < int, int > > points, int  hei
     return command;
 };
 
+vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int > > vector_, int split_point ) {
+    vector < vector < tuple < int, int > > > to_return;
+    vector < tuple < int, int > > vector_0;
+    vector < tuple < int, int > > vector_1;
+    bool vector_toggle = false;
+    for( int i = 0; i < vector_.size(); i++ ){
+        if( !vector_toggle ){
+            vector_0.push_back( vector_[i] );
+            if( i == ( split_point - 1 ) ){
+                vector_toggle = true;
+            };
+        }else{
+            vector_1.push_back( vector_[i] );
+        };
+    };
+    to_return.push_back( vector_0 );
+    to_return.push_back( vector_1 );
+    return to_return;
+};
+
+vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 ) {
+    vector < tuple < int, int > > to_return;
+    for( int i = 0; i < vector_0.size(); i++ ){
+        to_return.push_back( vector_0[i] );
+    };
+    for( int i = 0; i < vector_1.size(); i++ ){
+        to_return.push_back( vector_1[i] );
+    };
+    return to_return;
+};
