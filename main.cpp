@@ -127,7 +127,6 @@ vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, in
 };
 
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
-    cout << input.size() << " vs " << fixed_points.size() << endl;
     if( input.size() == 0 ){
         return fixed_points;
     }else if( input.size() > 0 ){
