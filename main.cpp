@@ -15,11 +15,12 @@ tuple < vector < tuple < int, int > >, int, int > read_input( string file_name )
 vector < string > string_tokenizer( string string_to_tok, char separator );
 vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
-vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, int p );
+vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < int > sort_by_radius( vector < int > input );
 bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
 vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int > > vector_, int split_point );
+vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
 // End block of declarations
 
 int main( int argc, const char* argv[] ){
@@ -39,7 +40,7 @@ int main( int argc, const char* argv[] ){
 
     vector < tuple < int, int > > divide_n_conquer_solution = divide_n_conquer( input );
     cout << endl << "Comandos para Geogebra [Salida: Divide y vencerás]: ";
-    cout << get_geogebra_plot_command( voracios_solution, height, width ) << endl;
+    cout << get_geogebra_plot_command( divide_n_conquer_solution, height, width ) << endl;
 
     cout << endl;
     return 0;
@@ -119,14 +120,33 @@ vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, 
 };
 
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input ){
-    return divide_n_conquer_( get<0>( input ), 2 );
+    int width = get< 1 >( input );
+    int height = get< 2 >( input );
+    vector < tuple < int, int > > fixed_points;
+    return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
 };
 
-vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, int p ){
-    vector < tuple < int, int > > to_return;
-    vector < vector < tuple < int, int > > > vector_splited = split_vector( input, p );
-    cout << vector_splited[1].size() << endl;
-    return to_return;
+vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
+    cout << input.size() << " vs " << fixed_points.size() << endl;
+    if( input.size() == 0 ){
+        return fixed_points;
+    }else if( input.size() > 0 ){
+        int major_radius_index = 0;
+        for( int i = 0; i < input.size(); i++ ){
+            if( get<1>( input[i] ) >= get<1>( input[major_radius_index] ) ){
+                major_radius_index = i;
+            };
+        };
+        bool a_i = are_intersected( input[major_radius_index], fixed_points, height, width );
+        if( !a_i ){
+            fixed_points.push_back( input[major_radius_index] );
+            input.erase(input.begin() + major_radius_index);
+            return divide_n_conquer_( input, fixed_points, width, height );
+        }else{
+            input.erase(input.begin() + major_radius_index);
+            return divide_n_conquer_( input, fixed_points, width, height );
+        };
+    };
 };
 
 vector < int > sort_by_radius( vector < int > input ){
