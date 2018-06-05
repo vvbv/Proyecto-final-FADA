@@ -194,9 +194,12 @@ vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vec
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height ){
     vector < tuple < int, int > > to_return;
     vector < tuple < int, int > > empty;
+    vector < double > total_areas;
     double areas[ input.size() ][ input.size() ];
     int input_size = input.size();
+    int id_major_area_row = 0;
     for( int i = 0; i < input_size; i++ ){
+        double total_area_row = 0;
         for( int j = 0; j < input_size; j++ ){
             if( i == j ){
                 if( !are_intersected( input[i], empty, height, width ) ){
@@ -221,9 +224,17 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
                     areas[i][j] = 0;
                 };
             };
+            total_area_row += areas[i][j];
+        };
+        total_areas.push_back( total_area_row );
+        if( total_area_row > total_areas[id_major_area_row] ){
+            id_major_area_row = i;
         };
     };
-   
+    // cout << total_areas[id_major_area_row] << endl;
+    // for( int x = 0; x < total_areas.size(); x++ ){
+    //     cout << total_areas[x] << endl;
+    // };
     return to_return;
 };
 
