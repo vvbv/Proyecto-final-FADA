@@ -24,6 +24,7 @@ vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, in
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
+vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height );
 vector < int > sort_by_radius( vector < int > input );
 bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
@@ -167,7 +168,8 @@ vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, in
     int width = get< 1 >( input );
     int height = get< 2 >( input );
     int area = width * height;
-    return dynamic_( points, empty, width, height );
+    //return dynamic_( points, empty, width, height );
+    return dynamic2_( points, width, height );
 };
 
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
@@ -187,6 +189,42 @@ vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vec
         fixed_points = merge_vectors( max( max (dynamic_( vector_splited[0], fixed_points, width, height ), fixed_points), max( dynamic_( vector_splited[1], fixed_points, width, height ), fixed_points ) ), fixed_points );
         return fixed_points;
     };
+};
+
+vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height ){
+    vector < tuple < int, int > > to_return;
+    vector < tuple < int, int > > empty;
+    double areas[ input.size() ][ input.size() ];
+    int input_size = input.size();
+    for( int i = 0; i < input_size; i++ ){
+        for( int j = 0; j < input_size; j++ ){
+            if( i == j ){
+                if( !are_intersected( input[i], empty, height, width ) ){
+                    areas[i][j] =PI * pow( get<1>( input[j] ), 2 ); 
+                };
+            }else if( i != j ){
+                bool flag_valid = true;
+                if( are_intersected( input[i], empty, height, width ) ){
+                    flag_valid = false;
+                };
+                if( are_intersected( input[j], empty, height, width ) ){
+                    flag_valid = false;
+                };
+                if( flag_valid ){
+                    vector < tuple < int, int > > fixed_points;
+                    fixed_points.push_back( input[j] );
+                    flag_valid = !are_intersected( input[i], fixed_points, height, width );
+                };
+                if( flag_valid ){
+                    areas[i][j] = ( PI * pow( get<1>( input[i] ), 2 ) ) + ( PI * pow( get<1>( input[j] ), 2 ) ); 
+                }else{
+                    areas[i][j] = 0;
+                };
+            };
+        };
+    };
+   
+    return to_return;
 };
 
 vector < int > sort_by_radius( vector < int > input ){
