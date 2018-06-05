@@ -19,7 +19,7 @@ const long double PI = 3.141592653589793238L;
 // Block of declarations
 tuple < vector < tuple < int, int > >, int, int > read_input( string file_name );
 vector < string > string_tokenizer( string string_to_tok, char separator );
-vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input );
+vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
@@ -43,7 +43,7 @@ int main( int argc, const char* argv[] ){
     cout << endl << "Comandos para Geogebra [ Entrada ]: ";
     cout << get_geogebra_plot_command( points, height, width ) << endl;
 
-    vector < tuple < int, int > > voracios_solution = voracious( input );
+    vector < tuple < int, int > > voracios_solution = greedy( input );
     cout << endl << "Comandos para Geogebra [ Salida: Voraz ]: ";
     cout << get_geogebra_plot_command( voracios_solution, height, width ) << endl;
 
@@ -100,7 +100,7 @@ vector < string > string_tokenizer( string string_to_tok, char separator ){
     return to_return;
 };
 
-vector < tuple < int, int > > voracious( tuple < vector < tuple < int, int > >, int, int > input ){
+vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int, int > input ){
     vector < tuple < int, int > > to_return; 
     int width = get< 1 >( input );
     int height = get< 2 >( input );
