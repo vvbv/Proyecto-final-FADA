@@ -192,6 +192,7 @@ vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vec
 };
 
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height ){
+    cout << endl << "DEBUG" << endl << endl;
     vector < tuple < int, int > > to_return;
     vector < tuple < int, int > > empty;
     vector < double > total_areas;
@@ -231,10 +232,66 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
             id_major_area_row = i;
         };
     };
-    // cout << total_areas[id_major_area_row] << endl;
-    // for( int x = 0; x < total_areas.size(); x++ ){
-    //     cout << total_areas[x] << endl;
-    // };
+
+    for( int x = 0; x < input_size; x++ ){
+        int total = 0;
+        for( int y = 0; y < input_size; y++ ){
+            cout << areas[x][y] << " # ";
+            total += areas[x][y];
+        };
+        cout << "   => TOTAL:" << total;
+        cout << endl;
+    };
+
+    int pivot_row = id_major_area_row;
+    int filter_row[ input_size ][ input_size ];
+    for( int i = 0; i < input_size; i++ ){
+        cout << "PiVot: " << pivot_row << endl;
+        for( int j = 0; j < input_size; j++ ){
+            if( areas[pivot_row][j] != 0 ){
+                filter_row[ i ][ j ] = 1;
+            }else{
+                filter_row[ i ][ j ] = 0;
+            };
+        };
+        for( int k = i; k < input_size; k++ ){
+            if( ( k != i ) && ( filter_row[ i ][k] == 1 ) ){
+                pivot_row = k;
+                break;
+            };
+        };
+    };
+    cout << endl;
+    for( int i = 0; i < input_size; i++ ){
+        for( int j = 0; j < input_size; j++ ){
+            cout << filter_row[i][j] << " ";
+        };
+        cout << endl;
+    };
+
+    int result[ input_size ];
+    for( int i = 0; i < input_size; i++ ){
+        bool zero_flag = false;
+        for( int j = 0; j < input_size; j++ ){
+            if( filter_row[j][i] == 0 ){
+                zero_flag = true;
+                break;
+            };
+        };
+        if( zero_flag ){
+            result[i] = 0;
+        }else{
+            result[i] = 1;
+            to_return.push_back( input[i] );
+        };
+    };
+
+    for( int i = 0; i < input_size; i++ ){
+        cout << result[i] << " ";
+    };
+    cout << endl;
+
+    cout << endl << endl << "END DEBUG" << endl;
     return to_return;
 };
 
