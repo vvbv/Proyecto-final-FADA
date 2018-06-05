@@ -109,7 +109,6 @@ vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int
     vector < int > radius;
     for( int i = 0; i < points.size(); i++ ){
         radius.push_back( get< 1 >( points[i] ) );
-        
     };
     radius = sort_by_radius( radius );
     vector < tuple < int, int > > sorted_points;
@@ -204,6 +203,25 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
         };
     };
     input_size = input.size();
+
+
+    vector < int > radius;
+    for( int i = 0; i < input.size(); i++ ){
+        radius.push_back( get< 1 >( input[i] ) );
+    };
+    radius = sort_by_radius( radius );
+    vector < tuple < int, int > > sorted_input;
+    for( int i = 0; i < radius.size(); i++ ){
+        for( int j = 0; j < input.size(); j++ ){
+            if( radius[i] == get< 1 >( input[j] ) ){
+                sorted_input.push_back( input[j] );
+                input.erase( input.begin() + j );
+            };
+        };
+    };
+    reverse( sorted_input.begin(), sorted_input.end() );
+    input = sorted_input;
+
     double areas[ input_size ][ input_size ];
     int id_major_area_row = 0;
     for( int i = 0; i < input_size; i++ ){
@@ -264,7 +282,7 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
             };
         };
         for( int k = i; k < input_size; k++ ){
-            if( ( filter_row[ i ][k] == 1 ) ){
+            if( ( filter_row[ 0 ][k] == 1 ) ){
                 pivot_row = k;
                 break;
             };
