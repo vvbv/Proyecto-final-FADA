@@ -109,7 +109,6 @@ vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int
     vector < int > radius;
     for( int i = 0; i < points.size(); i++ ){
         radius.push_back( get< 1 >( points[i] ) );
-        
     };
     radius = sort_by_radius( radius );
     vector < tuple < int, int > > sorted_points;
@@ -196,8 +195,34 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
     vector < tuple < int, int > > to_return;
     vector < tuple < int, int > > empty;
     vector < double > total_areas;
-    double areas[ input.size() ][ input.size() ];
     int input_size = input.size();
+    //Limpiando la entrada
+    for( int i = 0; i < input_size; i++ ){
+        if( are_intersected( input[i], empty, height, width ) ){
+            input.erase(input.begin() + i);
+        };
+    };
+    input_size = input.size();
+
+
+    vector < int > radius;
+    for( int i = 0; i < input.size(); i++ ){
+        radius.push_back( get< 1 >( input[i] ) );
+    };
+    radius = sort_by_radius( radius );
+    vector < tuple < int, int > > sorted_input;
+    for( int i = 0; i < radius.size(); i++ ){
+        for( int j = 0; j < input.size(); j++ ){
+            if( radius[i] == get< 1 >( input[j] ) ){
+                sorted_input.push_back( input[j] );
+                input.erase( input.begin() + j );
+            };
+        };
+    };
+    reverse( sorted_input.begin(), sorted_input.end() );
+    input = sorted_input;
+
+    double areas[ input_size ][ input_size ];
     int id_major_area_row = 0;
     for( int i = 0; i < input_size; i++ ){
         double total_area_row = 0;
@@ -218,6 +243,7 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
                     vector < tuple < int, int > > fixed_points;
                     fixed_points.push_back( input[j] );
                     flag_valid = !are_intersected( input[i], fixed_points, height, width );
+                    cout << i << " " << j << " " << flag_valid << endl;
                 };
                 if( flag_valid ){
                     areas[i][j] = ( PI * pow( get<1>( input[i] ), 2 ) ) + ( PI * pow( get<1>( input[j] ), 2 ) ); 
@@ -245,8 +271,9 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
 
     int pivot_row = id_major_area_row;
     int filter_row[ input_size ][ input_size ];
+    cout << endl;
     for( int i = 0; i < input_size; i++ ){
-        cout << "PiVot: " << pivot_row << endl;
+        cout << "Pivot: " << pivot_row << endl;
         for( int j = 0; j < input_size; j++ ){
             if( areas[pivot_row][j] != 0 ){
                 filter_row[ i ][ j ] = 1;
@@ -255,20 +282,20 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
             };
         };
         for( int k = i; k < input_size; k++ ){
-            if( ( k != i ) && ( filter_row[ i ][k] == 1 ) ){
+            if( ( filter_row[ 0 ][k] == 1 ) ){
                 pivot_row = k;
                 break;
             };
         };
     };
-    cout << endl;
+    cout << endl << endl;
     for( int i = 0; i < input_size; i++ ){
         for( int j = 0; j < input_size; j++ ){
             cout << filter_row[i][j] << " ";
         };
         cout << endl;
     };
-
+    cout << endl << "Resultado" << endl;
     int result[ input_size ];
     for( int i = 0; i < input_size; i++ ){
         bool zero_flag = false;
@@ -291,7 +318,11 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
     };
     cout << endl;
 
-    cout << endl << endl << "END DEBUG" << endl;
+    for( int i = 0; i < input_size; i++ ){
+        cout << get<0>(input[i]) << " - " << get<1>(input[i]) << " ||| ";
+    };
+
+    cout << endl << "END DEBUG" << endl;
     return to_return;
 };
 
@@ -359,7 +390,19 @@ bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > 
                     return true;
                 }else if( (y_max > height)||(x_max > width) ){
                     return true;
-                }else if( ( (x_max > fixed_point_x_min)&&(x_max < fixed_point_x_max) ) || ( (x_min < fixed_point_x_max)&&(x_min > fixed_point_x_min) )  ){
+                }else if( 
+                            //Casos 1 sentido
+                            ( (x_max > fixed_point_x_min) && (x_max < fixed_point_x_max) ) || 
+                            ( (x_min < fixed_point_x_max) && (x_min > fixed_point_x_min) ) || 
+                            ( (x_max == fixed_point_x_max) && ( x_min == fixed_point_x_min ) ) ||
+                            ( (x_max < fixed_point_x_max) && ( x_min == fixed_point_x_min ) ) ||
+                            ( (x_max == fixed_point_x_max) && ( x_min > fixed_point_x_min ) )  ||
+                            // Casos 2 sentido
+                            ( (x_max > fixed_point_x_min) && (x_min < fixed_point_x_max) ) || 
+                            ( (x_max > fixed_point_x_max) && (x_min < fixed_point_x_min) ) || 
+                            ( (x_max > fixed_point_x_max) && ( x_min == fixed_point_x_min ) ) ||
+                            ( (x_max == fixed_point_x_max) && ( x_min < fixed_point_x_min ) ) 
+                        ){
                     //cout << "C3: " << x_max << " " << fixed_point_x_min << " - " << x_min << " " << fixed_point_x_max << " - " << " =>";
                     return true;
                 };
