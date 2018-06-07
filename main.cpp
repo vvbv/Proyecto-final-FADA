@@ -25,12 +25,14 @@ vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > i
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height );
+vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, int width, int height );
 vector < int > sort_by_radius( vector < int > input );
 bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
 vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int > > vector_, int split_point );
 vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
 vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
+double circle_area( double radius );
 // End block of declarations
 
 int main( int argc, const char* argv[] ){
@@ -44,9 +46,9 @@ int main( int argc, const char* argv[] ){
     cout << endl << "Comandos para Geogebra [ Entrada ]: ";
     cout << get_geogebra_plot_command( points, height, width ) << endl;
 
-    vector < tuple < int, int > > voracios_solution = greedy( input );
+    vector < tuple < int, int > > greedy_solution = greedy( input );
     cout << endl << "Comandos para Geogebra [ Salida: Voraz ]: ";
-    cout << get_geogebra_plot_command( voracios_solution, height, width ) << endl;
+    cout << get_geogebra_plot_command( greedy_solution, height, width ) << endl;
 
     vector < tuple < int, int > > divide_n_conquer_solution = divide_n_conquer( input );
     cout << endl << "Comandos para Geogebra [ Salida: Divide y vencerás ]: ";
@@ -168,7 +170,8 @@ vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, in
     int height = get< 2 >( input );
     int area = width * height;
     //return dynamic_( points, empty, width, height );
-    return dynamic2_( points, width, height );
+    //return dynamic2_( points, width, height );
+    return dynamic3_( points, width, height );
 };
 
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
@@ -326,6 +329,24 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
     return to_return;
 };
 
+vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, int width, int height ){
+    vector < tuple < int, int > > to_return;
+    int input_size = input.size();
+    vector < tuple < int, int, double > > vec_start_end_n_area;
+    for( int i = 0; i < input_size; i++ ){
+        int point = get<0>( input[i] );
+        int radius = get<1>( input[i] );
+        tuple < int, int, double > tmp = make_tuple( (point - radius), (point + radius), circle_area( radius ) );
+        vec_start_end_n_area.push_back( tmp );
+    };
+
+    for(int i = 0; i < input_size; i++){
+        std::cout << "Start Point" << get<0>( vec_start_end_n_area[i] ) << std::endl;
+    };
+
+    return to_return;
+};
+
 vector < int > sort_by_radius( vector < int > input ){
     /*int mid = floor( input.size() / 2 );
     if( input.size() == 1 ){
@@ -474,4 +495,8 @@ vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vecto
     }else{
         return vector_1;
     };
+};
+
+double circle_area( double radius ){
+    return PI * pow( radius, 2 );
 };
