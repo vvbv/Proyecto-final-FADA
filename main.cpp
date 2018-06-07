@@ -339,9 +339,9 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         tuple < int, int, double > tmp = make_tuple( (point - radius), (point + radius), circle_area( radius ) );
         vec_start_end_n_area.push_back( tmp );
     };
-
+    std::cout << endl;
     for(int i = 0; i < input_size; i++){
-        std::cout << "Start Point" << get<0>( vec_start_end_n_area[i] ) << std::endl;
+        std::cout << "Start Point: " << get<0>( vec_start_end_n_area[i] ) << " end point " << get<1>( vec_start_end_n_area[i] ) << std::endl;
     };
 
     return to_return;
