@@ -22,6 +22,7 @@ vector < string > string_tokenizer( string string_to_tok, char separator );
 vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
+vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height );
@@ -58,7 +59,7 @@ int main( int argc, const char* argv[] ){
 
     vector < tuple < int, int > > dynamic_solution = dynamic( input );
     cout << endl << "Comandos para Geogebra [ Salida: Programación dinámica ]: ";
-    cout << get_geogebra_plot_command( dynamic_solution, height, width ) << endl;
+    //cout << get_geogebra_plot_command( dynamic_solution, height, width ) << endl;
 
     cout << endl;
     return 0;
@@ -140,7 +141,46 @@ vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, in
     int width = get< 1 >( input );
     int height = get< 2 >( input );
     vector < tuple < int, int > > fixed_points;
-    return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
+    vector < tuple < int, int > > input_x = get<0>( input );
+    //Limpiando la entrada
+    for( int i = 0; i < input_x.size(); i++ ){
+        if( are_intersected( input_x[i], fixed_points, height, width ) ){
+            input_x.erase(input_x.begin() + i);
+        };
+    };
+    //return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
+    return divide_n_conquer2_( input_x, fixed_points, width, height );
+};
+
+vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
+
+     if( input.size() == 1 ){
+         if( !are_intersected( input[0], fixed_points, height, width  ) ){
+            fixed_points.push_back( input[0] );
+            return fixed_points;
+         };
+    }else if( input.size() == 2 ){
+        vector < tuple < int, int > > points;
+        vector < tuple < int, int > > to_return;
+        points.push_back( input[1] );
+        if( !are_intersected( input[0], points, height, width  ) ){
+            points.push_back( points[0] );
+            return points;
+        }else{
+            if( get<1>(input[0]) > get<1>(input[1]) ){
+                to_return.push_back( input[0] );
+            }else{
+                to_return.push_back( input[1] );
+            };
+            return to_return;
+        };
+    }else{
+        int s_p = input.size()/2;
+        vector < vector < tuple < int, int > > > vector_splited = split_vector( input, s_p );
+        //vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
+        return merge_vectors( max ( max( divide_n_conquer2_( vector_splited[0], fixed_points, width, height ), fixed_points ), max( divide_n_conquer2_( vector_splited[1], fixed_points, width, height ),fixed_points ) ), fixed_points );
+    };
+
 };
 
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
@@ -371,10 +411,10 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         };
     };
 
-    std::cout << std::endl << "Sorted circles" << std::endl;
-    for(int i = 0; i < input_size; i++){
-        std::cout << "Start Point: " << get<0>( sorted_vec_start_end_n_area[i] ) << ", " << get<1>( sorted_vec_start_end_n_area[i] ) << ", " << get<2>( sorted_vec_start_end_n_area[i] )  << std::endl;
-    };
+    // std::cout << std::endl << "Sorted circles" << std::endl;
+    // for(int i = 0; i < input_size; i++){
+    //     std::cout << "Start Point: " << get<0>( sorted_vec_start_end_n_area[i] ) << ", " << get<1>( sorted_vec_start_end_n_area[i] ) << ", " << get<2>( sorted_vec_start_end_n_area[i] )  << std::endl;
+    // };
 
     double total_areas[ input_size ]; 
     // Fist case
@@ -453,15 +493,15 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         sub_solutions.push_back( sub_solution_with_area );
     };
 
-    for( int i = 0; i < input_size; i++ ){
-        for( int j = 0; j < input_size; j++ ){
-            std::cout << index_of_circles[i][j] << " ";
-        };
-        std::cout << "      <= " << total_areas[i];
-        std::cout << endl;
-    };
+    // for( int i = 0; i < input_size; i++ ){
+    //     for( int j = 0; j < input_size; j++ ){
+    //         std::cout << index_of_circles[i][j] << " ";
+    //     };
+    //     std::cout << "      <= " << total_areas[i];
+    //     std::cout << endl;
+    // };
 
-    std::cout << "Área máxima: " << total_areas[ input_size - 1 ] << std::endl;
+    std::cout << "Área máxima, prog dinámica: " << total_areas[ input_size - 1 ] << std::endl;
 
     // std::cout << std::endl << "Areas" << std::endl;
     // int id_max_subsolution = 0;
