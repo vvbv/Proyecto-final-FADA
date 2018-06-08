@@ -22,6 +22,7 @@ vector < string > string_tokenizer( string string_to_tok, char separator );
 vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
+vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height );
@@ -33,6 +34,8 @@ vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int
 vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
 vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
 double circle_area( double radius );
+void merge_sort(int arr[], int l, int r);
+void merge(int arr[], int l, int m, int r);
 // End block of declarations
 
 int main( int argc, const char* argv[] ){
@@ -56,7 +59,7 @@ int main( int argc, const char* argv[] ){
 
     vector < tuple < int, int > > dynamic_solution = dynamic( input );
     cout << endl << "Comandos para Geogebra [ Salida: Programación dinámica ]: ";
-    cout << get_geogebra_plot_command( dynamic_solution, height, width ) << endl;
+    //cout << get_geogebra_plot_command( dynamic_solution, height, width ) << endl;
 
     cout << endl;
     return 0;
@@ -138,7 +141,46 @@ vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, in
     int width = get< 1 >( input );
     int height = get< 2 >( input );
     vector < tuple < int, int > > fixed_points;
-    return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
+    vector < tuple < int, int > > input_x = get<0>( input );
+    //Limpiando la entrada
+    for( int i = 0; i < input_x.size(); i++ ){
+        if( are_intersected( input_x[i], fixed_points, height, width ) ){
+            input_x.erase(input_x.begin() + i);
+        };
+    };
+    //return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
+    return divide_n_conquer2_( input_x, fixed_points, width, height );
+};
+
+vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
+
+     if( input.size() == 1 ){
+         if( !are_intersected( input[0], fixed_points, height, width  ) ){
+            fixed_points.push_back( input[0] );
+            return fixed_points;
+         };
+    }else if( input.size() == 2 ){
+        vector < tuple < int, int > > points;
+        vector < tuple < int, int > > to_return;
+        points.push_back( input[1] );
+        if( !are_intersected( input[0], points, height, width  ) ){
+            points.push_back( points[0] );
+            return points;
+        }else{
+            if( get<1>(input[0]) > get<1>(input[1]) ){
+                to_return.push_back( input[0] );
+            }else{
+                to_return.push_back( input[1] );
+            };
+            return to_return;
+        };
+    }else{
+        int s_p = input.size()/2;
+        vector < vector < tuple < int, int > > > vector_splited = split_vector( input, s_p );
+        //vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
+        return merge_vectors( max ( max( divide_n_conquer2_( vector_splited[0], fixed_points, width, height ), fixed_points ), max( divide_n_conquer2_( vector_splited[1], fixed_points, width, height ),fixed_points ) ), fixed_points );
+    };
+
 };
 
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
@@ -330,19 +372,156 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
 };
 
 vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, int width, int height ){
+
     vector < tuple < int, int > > to_return;
+    vector < tuple < int, int > > empty;
     int input_size = input.size();
+    //Limpiando la entrada
+    for( int i = 0; i < input_size; i++ ){
+        if( are_intersected( input[i], empty, height, width ) ){
+            input.erase(input.begin() + i);
+        };
+    };
+    input_size = input.size();
     vector < tuple < int, int, double > > vec_start_end_n_area;
+    int array_end_points[ input_size ];
     for( int i = 0; i < input_size; i++ ){
         int point = get<0>( input[i] );
         int radius = get<1>( input[i] );
         tuple < int, int, double > tmp = make_tuple( (point - radius), (point + radius), circle_area( radius ) );
         vec_start_end_n_area.push_back( tmp );
+        array_end_points[ i ] = (point + radius);
+    };
+    merge_sort( array_end_points, 0, input_size - 1 );
+    std::cout << endl;
+    // for(int i = 0; i < input_size; i++){
+    //     std::cout << "Start Point: " << get<0>( vec_start_end_n_area[i] ) << " end point " << get<1>( vec_start_end_n_area[i] ) << std::endl;
+    //     std::cout << array_end_points[i] << std::endl; 
+    // };
+
+    vector < tuple < int, int, double > > sorted_vec_start_end_n_area;
+    for(int i = 0; i < input_size; i++){
+        int vec_start_end_n_area_size = vec_start_end_n_area.size();
+        for(int j = 0; j < vec_start_end_n_area_size; j++){
+            int end = get<1>( vec_start_end_n_area[j] );
+            if( array_end_points[i] == end ){
+                sorted_vec_start_end_n_area.push_back( vec_start_end_n_area[j] );
+                vec_start_end_n_area.erase( vec_start_end_n_area.begin() + j );
+            };
+        };
     };
 
-    for(int i = 0; i < input_size; i++){
-        std::cout << "Start Point" << get<0>( vec_start_end_n_area[i] ) << std::endl;
+    // std::cout << std::endl << "Sorted circles" << std::endl;
+    // for(int i = 0; i < input_size; i++){
+    //     std::cout << "Start Point: " << get<0>( sorted_vec_start_end_n_area[i] ) << ", " << get<1>( sorted_vec_start_end_n_area[i] ) << ", " << get<2>( sorted_vec_start_end_n_area[i] )  << std::endl;
+    // };
+
+    double total_areas[ input_size ]; 
+    // Fist case
+    total_areas[ 0 ] = get<2>( sorted_vec_start_end_n_area[ 0 ] );
+
+    vector < tuple < vector < tuple < int, int, double > >, int > > sub_solutions;
+    int index_of_circles[ input_size ][ input_size ];
+    for( int i = 0; i < input_size; i++ ){
+        for( int j = 0; j < input_size; j++ ){
+            index_of_circles[i][j] = 0;
+        };
     };
+
+    index_of_circles[0][0] = 1;
+
+    for( int i = 1; i < input_size; i++ ){
+        
+        int start = get<0>( sorted_vec_start_end_n_area[ i ] );
+        double acumulated_area = get<2>( sorted_vec_start_end_n_area[i] );
+        int new_j = -1;
+        vector < tuple < int, int, double > > sub_solution;
+        for( int j = i - 1; j >= 0; j-- ){
+            int sub_end = get<1>( sorted_vec_start_end_n_area[ j ] );
+            if( sub_end <= start ){
+                new_j = j;
+                break;
+            };
+        };
+        if( new_j != -1 ){
+            acumulated_area += total_areas[ new_j ];
+        };
+        
+        // if( new_j != -1 ){
+        //     acumulated_area += total_areas[ new_j ];
+        //     for( int x = 0; x < input_size; x++ ){
+        //         index_of_circles[i][x] = index_of_circles[i-1][x];
+        //     };
+        //     //index_of_circles[i][new_j] = new_j;
+        //     index_of_circles[i][new_j+1] = 1;
+        // }else{
+        //     for( int x = 0; x < input_size; x++ ){
+        //         index_of_circles[i][x] = index_of_circles[i-1][x];
+        //     };
+        //     //index_of_circles[i][i] = 1;
+        // };
+
+
+        // CASO 1 AUMENTA Y ENCUENTRA
+        // CASO 2 NO AUMENTA PERO ENCUENTRA
+        // CASO 3 NO AUMENTA NO ENCUENTRA
+        
+        total_areas[i] = std::max( total_areas[ i - 1 ], acumulated_area );
+        if( ( total_areas[i] == acumulated_area ) && (  new_j != -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == total_areas[ i - 1 ] ) && (  new_j != -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == total_areas[ i - 1 ] ) && (  new_j == -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == acumulated_area ) && (  new_j == -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = 0;
+             };
+            index_of_circles[i][i] = 1;
+        };
+        
+        tuple < vector < tuple < int, int, double > >, int > sub_solution_with_area = make_tuple( sub_solution, acumulated_area );
+        sub_solutions.push_back( sub_solution_with_area );
+    };
+
+    // for( int i = 0; i < input_size; i++ ){
+    //     for( int j = 0; j < input_size; j++ ){
+    //         std::cout << index_of_circles[i][j] << " ";
+    //     };
+    //     std::cout << "      <= " << total_areas[i];
+    //     std::cout << endl;
+    // };
+
+    std::cout << "Área máxima, prog dinámica: " << total_areas[ input_size - 1 ] << std::endl;
+
+    // std::cout << std::endl << "Areas" << std::endl;
+    // int id_max_subsolution = 0;
+    // int total_area_solution = 0;
+    // for(int i = 0; i < sub_solutions.size(); i++){
+    //     total_area_solution += get<1>(sub_solutions[i]);
+    //     std::cout << "Sub_sol Area: " << get<1>( sub_solutions[ i ] ) << " T:" << get<0>( sub_solutions[ i ] ).size() << std::endl;
+    //     int i_total_area_sub_solution = get<1>( sub_solutions[ i ] );
+    //     int current_total_area_solution = get<1>( sub_solutions[ id_max_subsolution ] );
+    //     if( i_total_area_sub_solution >= current_total_area_solution ){
+    //         id_max_subsolution = i;
+    //     };
+    // };
+    
+    // vector < tuple < int, int, double > > best_solution = get<0>( sub_solutions[ id_max_subsolution ] );
+    // int total_area_best_solution = get<1>( sub_solutions[ id_max_subsolution ] );
+    // int size_of_elements_in_solution = best_solution.size();
+    // for(int i = 0; i < size_of_elements_in_solution; i++){
+    //     std::cout << "Start Point: " << get<0>( best_solution[i] ) << " end point " << get<1>( best_solution[i] ) << std::endl;
+    // };
 
     return to_return;
 };
@@ -499,4 +678,63 @@ vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vecto
 
 double circle_area( double radius ){
     return PI * pow( radius, 2 );
+};
+
+void merge_sort(int arr[], int l, int r)
+{
+    if (l < r)
+    {
+        int m = l+(r-l)/2;
+ 
+        merge_sort(arr, l, m);
+        merge_sort(arr, m+1, r);
+ 
+        merge(arr, l, m, r);
+    };
+};
+
+void merge(int arr[], int l, int m, int r){
+
+    int i, j, k;
+    int n1 = m - l + 1;
+    int n2 =  r - m;
+ 
+    int L[n1], R[n2];
+ 
+    for (i = 0; i < n1; i++){
+        L[i] = arr[l + i];
+    };
+    for (j = 0; j < n2; j++){
+        R[j] = arr[m + 1+ j];
+    };
+
+    i = 0;
+    j = 0;
+    k = l;
+
+    while (i < n1 && j < n2){
+        if (L[i] <= R[j])
+        {
+            arr[k] = L[i];
+            i++;
+        }
+        else
+        {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+ 
+    while (i < n1){
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+ 
+    while (j < n2){
+        arr[k] = R[j];
+        j++;
+        k++;
+    };
 };
