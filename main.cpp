@@ -379,6 +379,7 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
     double total_areas[ input_size ]; 
     // Fist case
     total_areas[ 0 ] = get<2>( sorted_vec_start_end_n_area[ 0 ] );
+
     vector < tuple < vector < tuple < int, int, double > >, int > > sub_solutions;
     int index_of_circles[ input_size ][ input_size ];
     for( int i = 0; i < input_size; i++ ){
@@ -386,13 +387,17 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
             index_of_circles[i][j] = 0;
         };
     };
+
+    index_of_circles[0][0] = 1;
+
     for( int i = 1; i < input_size; i++ ){
         
         int start = get<0>( sorted_vec_start_end_n_area[ i ] );
         double acumulated_area = get<2>( sorted_vec_start_end_n_area[i] );
         int new_j = -1;
         vector < tuple < int, int, double > > sub_solution;
-        for( int j = i -1; j >= 0; j-- ){
+        for( int j = i - 1; j >= 0; j-- ){
+            std::cout << "I: "<< i << " J: " << j << std::endl;
             int sub_end = get<1>( sorted_vec_start_end_n_area[ j ] );
             if( sub_end <= start ){
                 new_j = j;
@@ -401,14 +406,40 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         };
         if( new_j != -1 ){
             acumulated_area += total_areas[ new_j ];
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+            };
             index_of_circles[i][new_j] = new_j;
+        }else{
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = 0;
+            };
+            index_of_circles[i][i] = i;
         };
-        sub_solution.push_back( sorted_vec_start_end_n_area[ new_j ] );
         total_areas[i] = std::max( total_areas[ i - 1 ], acumulated_area );
         /*if( total_areas[i] == acumulated_area ){
-            index_of_circles[i][new_j] = new_j;
+            if( new_j != -1 ){
+                for( int x = 0; x < input_size; x++ ){
+                    index_of_circles[i][x] = index_of_circles[i-1][x];
+                };
+                index_of_circles[i][new_j] = new_j;
+            }else{
+                for( int x = 0; x < input_size; x++ ){
+                    index_of_circles[i][x] = 0;
+                };
+                index_of_circles[i][new_j] = i;
+            };
         }else if( total_areas[i] == total_areas[ i - 1 ] ){
-            index_of_circles[i][new_j] = index_of_circles[i-1][new_j];
+            if( new_j == -1 ){
+                for( int x = 0; x < input_size; x++ ){
+                    index_of_circles[i][x] = index_of_circles[i-1][x];
+                };
+            }else{
+                for( int x = 0; x < input_size; x++ ){
+                    index_of_circles[i][x] = 0;
+                };
+                index_of_circles[i][new_j] = i;
+            };
         };*/
         tuple < vector < tuple < int, int, double > >, int > sub_solution_with_area = make_tuple( sub_solution, acumulated_area );
         sub_solutions.push_back( sub_solution_with_area );
@@ -418,6 +449,7 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         for( int j = 0; j < input_size; j++ ){
             std::cout << index_of_circles[i][j] << " ";
         };
+        std::cout << "      <= " << total_areas[i];
         std::cout << endl;
     };
 
