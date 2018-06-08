@@ -1,0 +1,6 @@
+#Ancho, Alto
+1000 500
+#Posicion X, Radio
+165 165
+330 166
+495 165
