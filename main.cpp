@@ -397,7 +397,6 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         int new_j = -1;
         vector < tuple < int, int, double > > sub_solution;
         for( int j = i - 1; j >= 0; j-- ){
-            std::cout << "I: "<< i << " J: " << j << std::endl;
             int sub_end = get<1>( sorted_vec_start_end_n_area[ j ] );
             if( sub_end <= start ){
                 new_j = j;
@@ -406,41 +405,50 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
         };
         if( new_j != -1 ){
             acumulated_area += total_areas[ new_j ];
+        };
+        
+        // if( new_j != -1 ){
+        //     acumulated_area += total_areas[ new_j ];
+        //     for( int x = 0; x < input_size; x++ ){
+        //         index_of_circles[i][x] = index_of_circles[i-1][x];
+        //     };
+        //     //index_of_circles[i][new_j] = new_j;
+        //     index_of_circles[i][new_j+1] = 1;
+        // }else{
+        //     for( int x = 0; x < input_size; x++ ){
+        //         index_of_circles[i][x] = index_of_circles[i-1][x];
+        //     };
+        //     //index_of_circles[i][i] = 1;
+        // };
+
+
+        // CASO 1 AUMENTA Y ENCUENTRA
+        // CASO 2 NO AUMENTA PERO ENCUENTRA
+        // CASO 3 NO AUMENTA NO ENCUENTRA
+        
+        total_areas[i] = std::max( total_areas[ i - 1 ], acumulated_area );
+        if( ( total_areas[i] == acumulated_area ) && (  new_j != -1 ) ){
             for( int x = 0; x < input_size; x++ ){
                 index_of_circles[i][x] = index_of_circles[i-1][x];
-            };
-            index_of_circles[i][new_j] = new_j;
-        }else{
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == total_areas[ i - 1 ] ) && (  new_j != -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == total_areas[ i - 1 ] ) && (  new_j == -1 ) ){
+            for( int x = 0; x < input_size; x++ ){
+                index_of_circles[i][x] = index_of_circles[i-1][x];
+             };
+            index_of_circles[i][new_j + 1] = 1;
+        }else if( ( total_areas[i] == acumulated_area ) && (  new_j == -1 ) ){
             for( int x = 0; x < input_size; x++ ){
                 index_of_circles[i][x] = 0;
-            };
-            index_of_circles[i][i] = i;
+             };
+            index_of_circles[i][i] = 1;
         };
-        total_areas[i] = std::max( total_areas[ i - 1 ], acumulated_area );
-        /*if( total_areas[i] == acumulated_area ){
-            if( new_j != -1 ){
-                for( int x = 0; x < input_size; x++ ){
-                    index_of_circles[i][x] = index_of_circles[i-1][x];
-                };
-                index_of_circles[i][new_j] = new_j;
-            }else{
-                for( int x = 0; x < input_size; x++ ){
-                    index_of_circles[i][x] = 0;
-                };
-                index_of_circles[i][new_j] = i;
-            };
-        }else if( total_areas[i] == total_areas[ i - 1 ] ){
-            if( new_j == -1 ){
-                for( int x = 0; x < input_size; x++ ){
-                    index_of_circles[i][x] = index_of_circles[i-1][x];
-                };
-            }else{
-                for( int x = 0; x < input_size; x++ ){
-                    index_of_circles[i][x] = 0;
-                };
-                index_of_circles[i][new_j] = i;
-            };
-        };*/
+        
         tuple < vector < tuple < int, int, double > >, int > sub_solution_with_area = make_tuple( sub_solution, acumulated_area );
         sub_solutions.push_back( sub_solution_with_area );
     };
@@ -455,18 +463,18 @@ vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, in
 
     std::cout << "Área máxima: " << total_areas[ input_size - 1 ] << std::endl;
 
-    std::cout << std::endl << "Areas" << std::endl;
-    int id_max_subsolution = 0;
-    int total_area_solution = 0;
-    for(int i = 0; i < sub_solutions.size(); i++){
-        total_area_solution += get<1>(sub_solutions[i]);
-        std::cout << "Sub_sol Area: " << get<1>( sub_solutions[ i ] ) << " T:" << get<0>( sub_solutions[ i ] ).size() << std::endl;
-        int i_total_area_sub_solution = get<1>( sub_solutions[ i ] );
-        int current_total_area_solution = get<1>( sub_solutions[ id_max_subsolution ] );
-        if( i_total_area_sub_solution >= current_total_area_solution ){
-            id_max_subsolution = i;
-        };
-    };
+    // std::cout << std::endl << "Areas" << std::endl;
+    // int id_max_subsolution = 0;
+    // int total_area_solution = 0;
+    // for(int i = 0; i < sub_solutions.size(); i++){
+    //     total_area_solution += get<1>(sub_solutions[i]);
+    //     std::cout << "Sub_sol Area: " << get<1>( sub_solutions[ i ] ) << " T:" << get<0>( sub_solutions[ i ] ).size() << std::endl;
+    //     int i_total_area_sub_solution = get<1>( sub_solutions[ i ] );
+    //     int current_total_area_solution = get<1>( sub_solutions[ id_max_subsolution ] );
+    //     if( i_total_area_sub_solution >= current_total_area_solution ){
+    //         id_max_subsolution = i;
+    //     };
+    // };
     
     // vector < tuple < int, int, double > > best_solution = get<0>( sub_solutions[ id_max_subsolution ] );
     // int total_area_best_solution = get<1>( sub_solutions[ id_max_subsolution ] );
