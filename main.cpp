@@ -178,7 +178,12 @@ vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > 
         int s_p = input.size()/2;
         vector < vector < tuple < int, int > > > vector_splited = split_vector( input, s_p );
         //vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
-        return merge_vectors( max ( max( divide_n_conquer2_( vector_splited[0], fixed_points, width, height ), fixed_points ), max( divide_n_conquer2_( vector_splited[1], fixed_points, width, height ),fixed_points ) ), fixed_points );
+        return merge_vectors( 
+            max ( 
+                divide_n_conquer2_( vector_splited[0], fixed_points, width, height ), fixed_points ), 
+                merge_vectors( 
+                        max( divide_n_conquer2_( vector_splited[1], fixed_points, width, height ),fixed_points ), fixed_points )
+                );
     };
 
 };
