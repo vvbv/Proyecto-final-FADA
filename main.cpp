@@ -23,12 +23,14 @@ vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int
 vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > divide_n_conquer_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
+vector < tuple < int, int > > divide_n_conquer3_( vector < tuple < int, int > > input, int width, int height );
 vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, int, int > input );
 vector < tuple < int, int > > dynamic_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height );
 vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, int width, int height );
 vector < tuple < int, int > > dynamic3_( vector < tuple < int, int > > input, int width, int height );
 vector < int > sort_by_radius( vector < int > input );
 bool are_intersected( tuple < int, int > new_point, vector < tuple < int, int > > fixed_points, int  height, int width );
+vector < tuple < int, int > > divide_n_conquer_merge_( vector < tuple < int, int > > input_0, vector < tuple < int, int > > input_1, int width, int height );
 string get_geogebra_plot_command( vector < tuple < int, int > > points, int  height, int width );
 vector < vector < tuple < int, int > > > split_vector( vector < tuple < int, int > > vector_, int split_point );
 vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 );
@@ -94,7 +96,7 @@ tuple < vector < tuple < int, int > >, int, int > read_input( string file_name )
 vector < string > string_tokenizer( string string_to_tok, char separator ){
     vector < string > to_return;
     string tmp_line = "";
-    for( int i = 0; i < sizeof( string_to_tok ); i++ ){
+    for( int i = 0; i < string_to_tok.size(); i++ ){
         if( string_to_tok[i] == separator ){
             to_return.push_back( tmp_line );
             tmp_line = "";
@@ -148,8 +150,93 @@ vector < tuple < int, int > > divide_n_conquer( tuple < vector < tuple < int, in
             input_x.erase(input_x.begin() + i);
         };
     };
+    int input_x_size = input_x.size();
+    vector < int > radius;
+    vector < tuple < int, int > > sorted_points;
+    for( int i = 0; i < input_x.size(); i++ ){
+        radius.push_back( get< 1 >( input_x[i] ) );
+    };
+    int radius_size = radius.size();
+    radius = sort_by_radius( radius );
+    for( int i = 0; i < radius_size; i++ ){
+        for( int j = 0; j < input_x_size; j++ ){
+            if( radius[i] == get< 1 >( input_x[j] ) ){
+                sorted_points.push_back( input_x[j] );
+                input_x.erase( input_x.begin() + j );
+            };
+        };
+    };
+    reverse( sorted_points.begin(), sorted_points.end() );
+
     //return divide_n_conquer_( get<0>( input ), fixed_points, width, height );
-    return divide_n_conquer2_( input_x, fixed_points, width, height );
+    //return divide_n_conquer2_( input_x, fixed_points, width, height );
+    vector < tuple < int, int > > to_return = divide_n_conquer3_( sorted_points, width, height );
+    int to_return_size = to_return.size();
+    for(int i = 0; i < to_return_size; i++){
+        if( ( get<0>( to_return[i] ) == 0) && ( get<1>( to_return[i] ) == 0 ) ){
+            to_return.erase( to_return.begin() + i );
+        };
+    };
+    return to_return;
+};
+
+vector < tuple < int, int > > divide_n_conquer3_( vector < tuple < int, int > > input, int width, int height ){
+    int input_size = input.size();
+    if( input_size == 1 ){
+        return input;
+    }else{
+        int s_p = input_size/2;
+        vector < vector < tuple < int, int > > > vector_splited = split_vector( input, s_p );
+        return divide_n_conquer_merge_(
+            divide_n_conquer3_( vector_splited[0], width, height ),
+            divide_n_conquer3_( vector_splited[1], width, height ),
+            width,
+            height
+        );
+    };
+};
+
+vector < tuple < int, int > > divide_n_conquer_merge_( vector < tuple < int, int > > input_0, vector < tuple < int, int > > input_1, int width, int height ){
+    vector < tuple < int, int > > to_return;
+    int size_input_0 = input_0.size();
+    int size_input_1 = input_1.size();
+    int i = 0;
+    int j = 0; 
+    int k;
+    if( size_input_0 >= size_input_1 ){
+        k = size_input_0 + ( size_input_0 - size_input_1 );
+    }else{
+        k = size_input_1 + ( size_input_1 - size_input_0 );
+    };
+    while( k >= 0 ){
+        if( ( size_input_0 > 0 ) && ( size_input_1 > 0 ) ){
+            int area_i = circle_area( get<1>( input_0[i] ) );
+            int area_j = circle_area( get<1>( input_1[j] ) );
+            if( area_i >= area_j ){
+                if( !are_intersected( input_0[i], to_return, height, width ) ){
+                    to_return.push_back( input_0[i] );
+                };
+                i++;
+            }else{
+                if( !are_intersected( input_1[j], to_return, height, width ) ){
+                    to_return.push_back( input_1[j] );
+                };
+                j++;
+            };
+        }else if( ( size_input_0 == 0 ) && ( size_input_1 > 0 ) ){
+            if( !are_intersected( input_1[j], to_return, height, width ) ){
+                to_return.push_back( input_1[j] );
+            };
+            j++;
+        }else if( ( size_input_0 > 0 ) && ( size_input_1 == 0 ) ){
+            if( !are_intersected( input_0[i], to_return, height, width ) ){
+                to_return.push_back( input_0[i] );
+            };
+            i++;
+        };
+        k--;
+    };
+    return to_return;
 };
 
 vector < tuple < int, int > > divide_n_conquer2_( vector < tuple < int, int > > input, vector < tuple < int, int > > fixed_points, int width, int height ){
