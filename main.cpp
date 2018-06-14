@@ -304,6 +304,12 @@ vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, in
     int width = get< 1 >( input );
     int height = get< 2 >( input );
     int area = width * height;
+    //Limpiando la entrada
+    for( int i = 0; i < points.size(); i++ ){
+        if( are_intersected( points[i], empty, height, width ) ){
+            points.erase(points.begin() + i);
+        };
+    };
     //return dynamic_( points, empty, width, height );
     //return dynamic2_( points, width, height );
     return dynamic3_( points, width, height );
