@@ -130,8 +130,7 @@ vector < tuple < int, int > > greedy( tuple < vector < tuple < int, int > >, int
     };
     reverse( sorted_points.begin(), sorted_points.end() );
     for( int i = 0; i < sorted_points.size(); i++ ){
-        bool are_intersected_ = true;
-        are_intersected_ = are_intersected( sorted_points[i], to_return, height, width );
+        bool are_intersected_ = are_intersected_ = are_intersected( sorted_points[i], to_return, height, width );
         if( !are_intersected_ ){
             to_return.push_back( sorted_points[i] );
         };
@@ -303,7 +302,7 @@ vector < tuple < int, int > > dynamic( tuple < vector < tuple < int, int > >, in
     vector < tuple < int, int > > empty;
     int width = get< 1 >( input );
     int height = get< 2 >( input );
-    int area = width * height;
+    // int area = width * height;
     //Limpiando la entrada
     for( int i = 0; i < points.size(); i++ ){
         if( are_intersected( points[i], empty, height, width ) ){
