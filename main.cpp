@@ -819,8 +819,8 @@ vector < tuple < int, int > > merge_vectors( vector < tuple < int, int > > vecto
 };
 
 vector < tuple < int, int > > max( vector < tuple < int, int > > vector_0, vector < tuple < int, int > > vector_1 ) {
-    int area_0;
-    int area_1;
+    int area_0 = 0;
+    int area_1 = 0;
     for( int i = 0; i < vector_0.size(); i++ ){
         area_0 += PI * pow( get<1>( vector_0[i] ), 2);
     };
