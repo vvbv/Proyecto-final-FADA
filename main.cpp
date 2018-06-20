@@ -374,7 +374,7 @@ vector < tuple < int, int > > dynamic2_( vector < tuple < int, int > > input, in
                 if( !are_intersected( input[i], empty, height, width ) ){
                     areas[i][j] =PI * pow( get<1>( input[j] ), 2 ); 
                 };
-            }else if( i != j ){
+            }else{
                 bool flag_valid = true;
                 if( are_intersected( input[i], empty, height, width ) ){
                     flag_valid = false;
